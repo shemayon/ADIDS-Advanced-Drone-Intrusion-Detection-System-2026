@@ -1,0 +1,12 @@
+=================================================================
+  A-DIDS — Advanced Drone Intrusion Detection System
+  UAE Defence Showcase 2026
+=================================================================
+
+[STEP 1] PCAP Feature Extraction
+─────────────────────────────────────────────────────────────────
+[PCAP] Reading: /mnt/ml-data/ISOT-drone/temp/ISOT Drone Dataset/Raw Data/DoS/Dos_1_4_30_20mins.pcap
+[PCAP] Reached packet limit (100)
+[PCAP] 100 raw flows from 100 packets
+[PCAP] 0 flows after filtering (min=3 pkts)
+[ERROR] No flows extracted. Check that the PCAP file is valid.

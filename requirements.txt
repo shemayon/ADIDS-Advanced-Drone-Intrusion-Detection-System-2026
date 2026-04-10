@@ -1,9 +1,9 @@
-# A-DIDS Requirements for UAE 2026 Showcase
-tensorflow>=2.10.0
+pandas>=1.5.0
 numpy>=1.21.0
-pandas>=1.3.0
+scikit-learn>=1.0.0
+xgboost>=1.7.0
+joblib>=1.1.0
+pyarrow>=10.0.0
+scapy>=2.5.0
 shap>=0.41.0
 matplotlib>=3.5.0
-onnx>=1.12.0
-tf2onnx>=1.11.0
-scikit-learn>=1.0.0

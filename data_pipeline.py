@@ -1,96 +1,87 @@
-import pandas as pd
+"""
+data_pipeline.py  —  A-DIDS Data Engineering Pipeline
+Loads 137 raw CSVs from the ISOT Drone Dataset, infers attack_type
+from the directory name, and exports a clean Parquet file.
+
+Usage (from repo root):
+    python3 data_pipeline.py [--base-path PATH] [--output PATH]
+"""
+
+import argparse
 import glob
 import os
+import sys
 
-SELECTED_FEATURES = [
-    'Duration', 'Rate', 'Entropy',
-    'Payload_Length', 'Var_Payload',
-    'syn_flag_number', 'ack_flag_number',
-    'rst_flag_number', 'fin_flag_number',
-    'TCP', 'UDP',
-    'Number', 'Tot size',
-    'AVG', 'Std', 'Min', 'Max'
-]
+import pandas as pd
 
-def load_data(base_path="extracted"):
-    # Look for files matching the pattern in the extracted directory
-    files = glob.glob(f"{base_path}/**/new_feature_csv/**/*.csv", recursive=True)
-    print(f"[INFO] Found {len(files)} CSV files")
+# Add repo root to path for config import
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from config.config import FEATURES, BENIGN_DIRS, DATA_PATH
 
-    if not files:
-        print(f"[ERROR] No CSV files found in {base_path}. Please check the extraction path.")
-        return None
+# ── CLI ───────────────────────────────────────────────────────
+parser = argparse.ArgumentParser(description="A-DIDS Data Pipeline")
+parser.add_argument("--base-path", default="extracted",
+                    help="Root directory containing the extracted ISOT dataset")
+parser.add_argument("--output", default=DATA_PATH,
+                    help="Output path for the Parquet file")
+args = parser.parse_args()
 
-    dfs = []
-    for f in files:
-        try:
-            df = pd.read_csv(f)
-            dfs.append(df)
-        except Exception as e:
-            print(f"[WARNING] Could not read {f}: {e}")
+print("=" * 60)
+print("  A-DIDS Data Pipeline")
+print("=" * 60)
 
-    if not dfs:
-        return None
-        
-    df = pd.concat(dfs, ignore_index=True)
-    print("[INFO] Raw shape:", df.shape)
+# ── 1. Discover CSV files ─────────────────────────────────────
+pattern = os.path.join(args.base_path, "**", "new_feature_csv", "**", "*.csv")
+files = glob.glob(pattern, recursive=True)
+print(f"\n[1/4] Discovered {len(files)} CSV files in: {args.base_path}")
 
-    return df
+if not files:
+    print(f"[ERROR] No CSVs found. Check that the dataset is extracted to '{args.base_path}'.")
+    sys.exit(1)
 
-def preprocess(df):
-    if df is None:
-        return None
-        
-    df.columns = df.columns.str.strip()
-
-    # Binary label: If attack_type is not 'benign', it's an intrusion
-    if "attack_type" in df.columns:
-        df["label"] = (df["attack_type"] != "benign").astype(int)
-    else:
-        print("[ERROR] 'attack_type' column missing. Cannot create labels.")
-        return None
-
-    # Filter for selected features
-    available_features = [f for f in SELECTED_FEATURES if f in df.columns]
-    if len(available_features) < len(SELECTED_FEATURES):
-        missing = set(SELECTED_FEATURES) - set(available_features)
-        print(f"[WARNING] Missing columns: {missing}")
-        
-    df = df[available_features + ["label"]]
-    df = df.dropna()
-
-    print("[INFO] Final shape:", df.shape)
-    return df
-
-files = glob.glob("extracted/**/new_feature_csv/**/*.csv", recursive=True)
-
+# ── 2. Load & label each file ─────────────────────────────────
+print(f"\n[2/4] Loading and labelling files ...")
 dfs = []
+skipped = 0
 
 for f in files:
-    print("[INFO] Loading:", f)
-    # Using low_memory=False to avoid DtypeWarning if any
-    df = pd.read_csv(f, low_memory=False)
-    
-    # Extract attack type from the parent directory
-    # Structure: .../new_feature_csv/DIR_NAME/FILE.csv
+    try:
+        df = pd.read_csv(f, low_memory=False)
+    except Exception as e:
+        print(f"  [WARN] Skipping {f}: {e}")
+        skipped += 1
+        continue
+
+    # Infer attack type from parent directory name
     attack_type = os.path.basename(os.path.dirname(f))
-    
-    # Map 'Regular' and 'Video' to 'benign', otherwise use the dir name
-    if attack_type in ["Regular", "Video"]:
-        df["attack_type"] = "benign"
-    else:
-        df["attack_type"] = attack_type
-        
+    df["attack_type"] = "benign" if attack_type in BENIGN_DIRS else attack_type
     dfs.append(df)
 
+print(f"  Loaded: {len(dfs)} files  |  Skipped: {skipped}")
+
+# ── 3. Merge, label, filter ───────────────────────────────────
+print(f"\n[3/4] Merging and preprocessing ...")
 df = pd.concat(dfs, ignore_index=True)
+print(f"  Raw shape: {df.shape}")
 
 df["label"] = (df["attack_type"] != "benign").astype(int)
 
-# Filter for selected features and label
-df = df[SELECTED_FEATURES + ["label"]]
+# Validate all selected features exist
+missing = [f for f in FEATURES if f not in df.columns]
+if missing:
+    print(f"[ERROR] Missing feature columns: {missing}")
+    sys.exit(1)
+
+df = df[FEATURES + ["label"]]
 df = df.dropna()
 
-df.to_parquet("drone_dataset.parquet", index=False)
+print(f"  Final shape: {df.shape}")
+print(f"  Benign rows : {(df['label'] == 0).sum():,}")
+print(f"  Attack rows : {(df['label'] == 1).sum():,}")
 
-print("[INFO] Saved dataset:", df.shape)
+# ── 4. Export Parquet ─────────────────────────────────────────
+print(f"\n[4/4] Saving to: {args.output}")
+os.makedirs(os.path.dirname(args.output) if os.path.dirname(args.output) else ".", exist_ok=True)
+df.to_parquet(args.output, index=False)
+print(f"  [✓] Saved: {df.shape[0]:,} rows × {df.shape[1]} columns")
+print(f"\n[DONE] Dataset ready at: {args.output}")

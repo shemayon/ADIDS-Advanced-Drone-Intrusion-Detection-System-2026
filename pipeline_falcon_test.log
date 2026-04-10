@@ -1,0 +1,181 @@
+=================================================================
+  A-DIDS — Advanced Drone Intrusion Detection System
+  UAE Defence Showcase 2026
+=================================================================
+
+[STEP 1] PCAP Feature Extraction
+─────────────────────────────────────────────────────────────────
+[PCAP] Reading: /mnt/ml-data/ISOT-drone/temp/ISOT Drone Dataset/Raw Data/DoS/Dos_1_4_30_20mins.pcap
+[PCAP] 63,668 raw flows from 219,241 packets
+[PCAP] 39,826 flows after filtering (min=3 pkts)
+
+[STEP 2] IDS Detection (39,826 flows)
+─────────────────────────────────────────────────────────────────
+[Engine] Loaded model: /mnt/ml-data/ISOT-drone/ADIDS-Advanced-Drone-Intrusion-Detection-System-2026/models/model.pkl
+[IDS] Engine ready.
+  Total flows         : 39,826
+  🔴 Attacks detected : 39,826 (100.0%)
+  🟢 Benign           : 0
+  High-conf attacks   : 39,826 (conf ≥ 95%)
+
+[STEP 3] XAI Truth Triggers (SHAP)
+─────────────────────────────────────────────────────────────────
+[XAI] SHAP TreeExplainer ready.
+
+[STEP 4] Tactical Briefings (top 5 attack flows)
+
+  ────────────────────────────────────────────────────────────
+  FLOW #1  |  Pkts: 22133  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Var_Payload (→ ATTACK) | UDP (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Var_Payload, UDP
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Var_Payload، UDP
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [FALCON-H1 REASONING]
+  The detection of DoS is confirmed by extreme packet rates (932.1 pkts/s) sustained over 23.7 seconds. Since Entropy is the primary trigger, this indicates highly structured malicious payloads.
+  
+  تم تأكيد اكتشاف DoS من خلال معدلات حزم متطرفة (932.1 حزمة/ثانية) مستمرة لفترة 23.7 ثانية. نظرًا لأن Entropy هو المؤشر الرئيسي، فإن هذا يشير إلى حمولات خبيثة شديدة التنظيم.
+
+  ────────────────────────────────────────────────────────────
+  FLOW #2  |  Pkts: 3  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Rate (→ BENIGN) | Var_Payload (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Rate, Var_Payload
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Rate، Var_Payload
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [FALCON-H1 REASONING]
+  The detection of DoS is confirmed by extreme packet rates (0.0 pkts/s) sustained over 65.5 seconds. Since Entropy is the primary trigger, this indicates highly structured malicious payloads.
+  
+  تم تأكيد اكتشاف DoS من خلال معدلات حزم متطرفة (0.0 حزمة/ثانية) مستمرة لفترة 65.5 ثانية. نظرًا لأن Entropy هو المؤشر الرئيسي، فإن هذا يشير إلى حمولات خبيثة شديدة التنظيم.
+
+  ────────────────────────────────────────────────────────────
+  FLOW #3  |  Pkts: 3  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Rate (→ BENIGN) | Var_Payload (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Rate, Var_Payload
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Rate، Var_Payload
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [FALCON-H1 REASONING]
+  The detection of DoS is confirmed by extreme packet rates (0.0 pkts/s) sustained over 65.6 seconds. Since Entropy is the primary trigger, this indicates highly structured malicious payloads.
+  
+  تم تأكيد اكتشاف DoS من خلال معدلات حزم متطرفة (0.0 حزمة/ثانية) مستمرة لفترة 65.6 ثانية. نظرًا لأن Entropy هو المؤشر الرئيسي، فإن هذا يشير إلى حمولات خبيثة شديدة التنظيم.
+
+  ────────────────────────────────────────────────────────────
+  FLOW #4  |  Pkts: 3  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Rate (→ BENIGN) | Var_Payload (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Rate, Var_Payload
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Rate، Var_Payload
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [FALCON-H1 REASONING]
+  The detection of DoS is confirmed by extreme packet rates (0.0 pkts/s) sustained over 65.5 seconds. Since Entropy is the primary trigger, this indicates highly structured malicious payloads.
+  
+  تم تأكيد اكتشاف DoS من خلال معدلات حزم متطرفة (0.0 حزمة/ثانية) مستمرة لفترة 65.5 ثانية. نظرًا لأن Entropy هو المؤشر الرئيسي، فإن هذا يشير إلى حمولات خبيثة شديدة التنظيم.
+
+  ────────────────────────────────────────────────────────────
+  FLOW #5  |  Pkts: 3  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Rate (→ BENIGN) | Var_Payload (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Rate, Var_Payload
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Rate، Var_Payload
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [FALCON-H1 REASONING]
+  The detection of DoS is confirmed by extreme packet rates (0.0 pkts/s) sustained over 65.5 seconds. Since Entropy is the primary trigger, this indicates highly structured malicious payloads.
+  
+  تم تأكيد اكتشاف DoS من خلال معدلات حزم متطرفة (0.0 حزمة/ثانية) مستمرة لفترة 65.5 ثانية. نظرًا لأن Entropy هو المؤشر الرئيسي، فإن هذا يشير إلى حمولات خبيثة شديدة التنظيم.
+
+=================================================================
+  PIPELINE COMPLETE — Dos_1_4_30_20mins.pcap
+=================================================================
+  Flows analysed : 39,826
+  Attacks found  : 39,826  (100.0%)
+  Model          : XGBoost (99.1% accuracy, ROC-AUC 0.9998)
+  Dataset        : ISOT Drone (2,945,854 rows)
+  Deployment     : UAE-Tactical-Swarm-01
+=================================================================
+

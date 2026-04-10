@@ -1,75 +1,142 @@
-import json
+"""
+modules/tactical_briefing.py  —  A-DIDS Tactical Reporting Engine
+Generates English / Arabic command briefings from IDS detection results
+and XAI Truth Triggers. Designed for UAE Military Operator interface.
+"""
+
+from __future__ import annotations
+import os
+import sys
+from typing import List
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from config.config import DEPLOYMENT_UNIT, REGION
+
 
 class TacticalBriefing:
-    def __init__(self, language="en"):
-        """
-        Tactical Briefing Module for A-DIDS.
-        Simulates an LLM agent that interprets IDS/XAI data into narrative reports.
-        
-        Args:
-            language (str): 'en' or 'ar' (Arabic)
-        """
-        self.language = language
-        self.templates = {
-            "en": {
-                "header": "### [A-DIDS] TACTICAL SECURITY ALERT",
-                "alert": "Alert Type: {alert_type}",
-                "confidence": "Confidence Score: {confidence:.2%}",
-                "narrative": "Analysis: The network flow for {unit_id} exhibits abnormal behavior characteristic of an {alert_type} attack. This assessment is driven by anomalies in {features}.",
-                "recommendation": "Recommended Action: {recommendation}",
-                "footer": "--- Deployment Unit: UAE-Tactical-Edge ---"
-            },
-            "ar": {
-                "header": "### [A-DIDS] تنبيه أمني تكتيكي",
-                "alert": "نوع التنبيه: {alert_type}",
-                "confidence": "درجة الثقة: {confidence:.2%}",
-                "narrative": "التحليل: أظهر تدفق الشبكة للوحدة {unit_id} سلوكاً غير طبيعي يشير إلى هجوم من نوع {alert_type}. هذا التقييم مدفوع بشذوذ في {features}.",
-                "recommendation": "الإجراء الموصى به: {recommendation}",
-                "footer": "--- وحدة الانتشار: الإمارات - الحافة التكتيكية ---"
-            }
-        }
-        
-        self.attack_decoding = {
-            "DoS": {"ar": "هجوم حجب الخدمة", "rec_en": "Trigger frequency hopping.", "rec_ar": "بدء القفز الترددي الطارئ."},
-            "Spoofing": {"ar": "هجوم انتحال الهوية", "rec_en": "Initiate cryptographic re-handshake.", "rec_ar": "بدء إعادة المصافحة المشفرة."},
-            "Injection": {"ar": "حقن البيانات", "rec_en": "Isolate the compromised node.", "rec_ar": "عزل العقدة المخترقة."},
-            "Normal": {"ar": "طبيعي", "rec_en": "Continue baseline monitoring.", "rec_ar": "متابعة المراقبة الأساسية."}
-        }
+    """
+    Bilingual Tactical Briefing Engine.
+    Converts threat detections + SHAP triggers into narrative reports
+    for immediate military decision-making.
+    """
 
-    def generate_briefing(self, alert_type, confidence, top_features, unit_id="Drone-04"):
+    ATTACK_META = {
+        "DoS": {
+            "en_name": "Denial-of-Service (DoS)",
+            "ar_name": "هجوم حجب الخدمة",
+            "rec_en":  "Trigger emergency frequency hopping. Isolate affected swarm node.",
+            "rec_ar":  "تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.",
+        },
+        "Injection": {
+            "en_name": "Command Injection",
+            "ar_name": "حقن الأوامر",
+            "rec_en":  "Isolate compromised node immediately. Switch to secondary control channel.",
+            "rec_ar":  "عزل العقدة الفورية المخترقة. التبديل إلى قناة التحكم الاحتياطية.",
+        },
+        "Manipulation": {
+            "en_name": "Telemetry Manipulation",
+            "ar_name": "التلاعب بالقياس عن بُعد",
+            "rec_en":  "Cross-validate sensor data with adjacent swarm nodes. Flag for forensics.",
+            "rec_ar":  "التحقق المتقاطع من بيانات الاستشعار. وضع علامة للتحليل الجنائي.",
+        },
+        "MITM": {
+            "en_name": "Man-in-the-Middle (MITM)",
+            "ar_name": "هجوم الوسيط",
+            "rec_en":  "Initiate cryptographic re-handshake. Verify certificate chain.",
+            "rec_ar":  "بدء إعادة المصافحة المشفرة. التحقق من سلسلة الشهادات.",
+        },
+        "Ip Spoofing": {
+            "en_name": "IP Spoofing",
+            "ar_name": "انتحال عنوان IP",
+            "rec_en":  "Activate strict source verification. Blacklist spoofed IP range.",
+            "rec_ar":  "تفعيل التحقق الصارم من المصدر. إدراج نطاق IP المنتحل في القائمة السوداء.",
+        },
+        "Password Cracking": {
+            "en_name": "Password Cracking / Brute-Force",
+            "ar_name": "كسر كلمة المرور / القوة الغاشمة",
+            "rec_en":  "Lock telemetry interface. Rotate authentication keys immediately.",
+            "rec_ar":  "قفل واجهة القياس عن بُعد. تدوير مفاتيح المصادقة فورًا.",
+        },
+        "Replay": {
+            "en_name": "Replay Attack",
+            "ar_name": "هجوم إعادة التشغيل",
+            "rec_en":  "Enable nonce-based anti-replay. Resync timestamps with ground station.",
+            "rec_ar":  "تفعيل الحماية من إعادة التشغيل. إعادة مزامنة الطوابع الزمنية.",
+        },
+        "Unauth": {
+            "en_name": "Unauthorised Access",
+            "ar_name": "وصول غير مصرح به",
+            "rec_en":  "Deny connection. Log endpoint for investigation.",
+            "rec_ar":  "رفض الاتصال. تسجيل نقطة النهاية للتحقيق.",
+        },
+        "BENIGN": {
+            "en_name": "Normal Traffic",
+            "ar_name": "حركة مرور طبيعية",
+            "rec_en":  "Continue standard monitoring.",
+            "rec_ar":  "متابعة المراقبة القياسية.",
+        },
+    }
+
+    def __init__(self, language: str = "en"):
+        if language not in ("en", "ar"):
+            raise ValueError("language must be 'en' or 'ar'")
+        self.language = language
+
+    def generate_briefing(
+        self,
+        alert_type: str,
+        confidence: float,
+        top_features: List[str],
+        unit_id: str = DEPLOYMENT_UNIT,
+    ) -> str:
         """
-        Generates a tactical narrative report.
+        Generate a tactical narrative report.
+
+        Parameters
+        ----------
+        alert_type    : attack category label (e.g. 'DoS', 'BENIGN')
+        confidence    : model confidence score (0.0 – 1.0)
+        top_features  : list of top SHAP feature names (Truth Triggers)
+        unit_id       : drone / unit identifier string
         """
-        # Translate alert type for Arabic if needed
-        translated_type = alert_type
-        if self.language == "ar" and alert_type in self.attack_decoding:
-            translated_type = self.attack_decoding[alert_type]["ar"]
-            
-        # Get recommendations
-        rec_key = f"rec_{self.language}"
-        recommendation = self.attack_decoding.get(alert_type, {}).get(rec_key, "Alert command.")
-        
-        # Format features string
-        features_str = ", ".join(top_features)
-        
-        tpl = self.templates[self.language]
-        
-        report = [
-            tpl["header"],
-            tpl["alert"].format(alert_type=translated_type),
-            tpl["confidence"].format(confidence=confidence),
-            tpl["narrative"].format(unit_id=unit_id, alert_type=translated_type, features=features_str),
-            tpl["recommendation"].format(recommendation=recommendation),
-            tpl["footer"]
-        ]
-        
-        return "\n".join(report)
+        meta   = self.ATTACK_META.get(alert_type, self.ATTACK_META["Unauth"])
+        is_ar  = self.language == "ar"
+
+        name   = meta["ar_name"] if is_ar else meta["en_name"]
+        rec    = meta["rec_ar"]  if is_ar else meta["rec_en"]
+        feats  = "، ".join(top_features) if is_ar else ", ".join(top_features)
+        region = REGION
+
+        if is_ar:
+            lines = [
+                "━" * 55,
+                f"  [A-DIDS] تنبيه أمني تكتيكي — {region}",
+                "━" * 55,
+                f"  نوع الهجوم     : {name}",
+                f"  درجة الثقة     : {confidence:.2%}",
+                f"  الوحدة         : {unit_id}",
+                f"  مؤشرات الكشف   : {feats}",
+                f"  الإجراء الموصى : {rec}",
+                "━" * 55,
+            ]
+        else:
+            lines = [
+                "━" * 55,
+                f"  [A-DIDS] TACTICAL SECURITY ALERT — {region}",
+                "━" * 55,
+                f"  Alert Type   : {name}",
+                f"  Confidence   : {confidence:.2%}",
+                f"  Unit         : {unit_id}",
+                f"  Truth Triggers: {feats}",
+                f"  Action       : {rec}",
+                "━" * 55,
+            ]
+        return "\n".join(lines)
+
 
 if __name__ == "__main__":
-    brief = TacticalBriefing(language="en")
-    print(brief.generate_briefing("DoS", 0.998, ["Packet_Rate", "Payload_Length"]))
-    
-    print("\n")
-    
-    brief_ar = TacticalBriefing(language="ar")
-    print(brief_ar.generate_briefing("DoS", 0.998, ["معدل الحزم", "طول الحمولة"]))
+    brief = TacticalBriefing("en")
+    print(brief.generate_briefing("DoS", 0.998, ["Entropy", "Rate", "Duration"]))
+    print()
+    brief_ar = TacticalBriefing("ar")
+    print(brief_ar.generate_briefing("DoS", 0.998, ["Entropy", "Rate", "Duration"]))

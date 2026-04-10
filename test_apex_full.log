@@ -1,0 +1,218 @@
+=================================================================
+  A-DIDS — Advanced Drone Intrusion Detection System
+  UAE Defence Showcase 2026
+=================================================================
+
+[STEP 1] PCAP Feature Extraction
+─────────────────────────────────────────────────────────────────
+[PCAP] Reading: /mnt/ml-data/ISOT-drone/temp/ISOT Drone Dataset/Raw Data/DoS/Dos_1_4_30_20mins.pcap
+[PCAP] Reached packet limit (50,000)
+[PCAP] 36,065 raw flows from 50,000 packets
+[PCAP] 3,296 flows after filtering (min=3 pkts)
+
+[STEP 2] IDS Detection (3,296 flows)
+─────────────────────────────────────────────────────────────────
+[Engine] Loaded model: /mnt/ml-data/ISOT-drone/ADIDS-Advanced-Drone-Intrusion-Detection-System-2026/models/model.pkl
+[IDS] Engine ready.
+  Total flows         : 3,296
+  🔴 Attacks detected : 3,296 (100.0%)
+  🟢 Benign           : 0
+  High-conf attacks   : 3,296 (conf ≥ 95%)
+
+[STEP 3] XAI Truth Triggers (SHAP)
+─────────────────────────────────────────────────────────────────
+[XAI] SHAP TreeExplainer ready.
+
+[STEP 4] Tactical Briefings (top 5 attack flows)
+
+
+[APEX] 🛡️ INITIALIZING HYBRID SENTINEL ARCHITECTURE 🛡️
+[Kinetic] SDN Auto-Mitigation Layer Active.
+[Consensus] Swarm Byzantine Tolerance Active (requires 3/5 nodes).
+[RF-PHY] SDR Telemetry Stream Hooked.
+[Temporal] Sliding Window Sequence Analyzer Initialized (n=10).
+[APEX] Training Unsupervised Zero-Day Memory...
+[DataLoader] Loading: /mnt/ml-data/ISOT-drone/ADIDS-Advanced-Drone-Intrusion-Detection-System-2026/data/drone_dataset.parquet
+[DataLoader] Shape: (1000, 18)  |  Attack rate: 20.00%
+[ZeroDay] Training Isolation Forest on Normal Flight Patterns...
+
+  ────────────────────────────────────────────────────────────
+  FLOW #1  |  Pkts: 3  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Rate (→ BENIGN) | Var_Payload (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Rate, Var_Payload
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Rate، Var_Payload
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [APEX] Cross-Referencing Defense Matrix...
+  [Consensus] Broadcasting alert hash to neighbor nodes...
+  [Consensus] ✅ Verified: 3/5 nodes corroborate anomaly.
+
+[⚡ KINETIC RESPONSE TRIGGERED ⚡]
+  [SDN] Injecting Drop Rule: iptables -A INPUT -s 10.0.0.42 -j DROP
+  [PHY] Commencing Emergency Frequency Hopping: 2.4GHz -> 5.8GHz Backup
+  Response Latency: 12ms. Threat Neuatralized.
+  [APEX STATUS] KINETIC_MITIGATION - Consensus Verified
+
+  ────────────────────────────────────────────────────────────
+  FLOW #2  |  Pkts: 3  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Rate (→ BENIGN) | Var_Payload (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Rate, Var_Payload
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Rate، Var_Payload
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [APEX] Cross-Referencing Defense Matrix...
+  [Consensus] Broadcasting alert hash to neighbor nodes...
+  [Consensus] ✅ Verified: 3/5 nodes corroborate anomaly.
+
+[⚡ KINETIC RESPONSE TRIGGERED ⚡]
+  [SDN] Injecting Drop Rule: iptables -A INPUT -s 10.0.0.42 -j DROP
+  [PHY] Commencing Emergency Frequency Hopping: 2.4GHz -> 5.8GHz Backup
+  Response Latency: 12ms. Threat Neuatralized.
+  [APEX STATUS] KINETIC_MITIGATION - Consensus Verified
+
+  ────────────────────────────────────────────────────────────
+  FLOW #3  |  Pkts: 3  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Rate (→ BENIGN) | Var_Payload (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Rate, Var_Payload
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Rate، Var_Payload
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [APEX] Cross-Referencing Defense Matrix...
+  [Consensus] Broadcasting alert hash to neighbor nodes...
+  [Consensus] ✅ Verified: 3/5 nodes corroborate anomaly.
+
+[⚡ KINETIC RESPONSE TRIGGERED ⚡]
+  [SDN] Injecting Drop Rule: iptables -A INPUT -s 10.0.0.42 -j DROP
+  [PHY] Commencing Emergency Frequency Hopping: 2.4GHz -> 5.8GHz Backup
+  Response Latency: 12ms. Threat Neuatralized.
+  [APEX STATUS] KINETIC_MITIGATION - Consensus Verified
+
+  ────────────────────────────────────────────────────────────
+  FLOW #4  |  Pkts: 3  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Rate (→ BENIGN) | Var_Payload (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Rate, Var_Payload
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Rate، Var_Payload
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [APEX] Cross-Referencing Defense Matrix...
+  [Consensus] Broadcasting alert hash to neighbor nodes...
+  [Consensus] ✅ Verified: 3/5 nodes corroborate anomaly.
+
+[⚡ KINETIC RESPONSE TRIGGERED ⚡]
+  [SDN] Injecting Drop Rule: iptables -A INPUT -s 10.0.0.42 -j DROP
+  [PHY] Commencing Emergency Frequency Hopping: 2.4GHz -> 5.8GHz Backup
+  Response Latency: 12ms. Threat Neuatralized.
+  [APEX STATUS] KINETIC_MITIGATION - Consensus Verified
+
+  ────────────────────────────────────────────────────────────
+  FLOW #5  |  Pkts: 3  |  P(attack): 100.00%
+  Truth Triggers: Entropy (→ ATTACK) | Rate (→ BENIGN) | Var_Payload (→ ATTACK)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] TACTICAL SECURITY ALERT — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Alert Type   : Denial-of-Service (DoS)
+  Confidence   : 100.00%
+  Unit         : UAE-Tactical-Swarm-01
+  Truth Triggers: Entropy, Rate, Var_Payload
+  Action       : Trigger emergency frequency hopping. Isolate affected swarm node.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  [A-DIDS] تنبيه أمني تكتيكي — Abu Dhabi Defence Sector
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  نوع الهجوم     : هجوم حجب الخدمة
+  درجة الثقة     : 100.00%
+  الوحدة         : UAE-Tactical-Swarm-01
+  مؤشرات الكشف   : Entropy، Rate، Var_Payload
+  الإجراء الموصى : تفعيل القفز الترددي الطارئ. عزل العقدة المتضررة في السرب.
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  [APEX] Cross-Referencing Defense Matrix...
+  [Consensus] Broadcasting alert hash to neighbor nodes...
+  [Consensus] ✅ Verified: 3/5 nodes corroborate anomaly.
+
+[⚡ KINETIC RESPONSE TRIGGERED ⚡]
+  [SDN] Injecting Drop Rule: iptables -A INPUT -s 10.0.0.42 -j DROP
+  [PHY] Commencing Emergency Frequency Hopping: 2.4GHz -> 5.8GHz Backup
+  Response Latency: 12ms. Threat Neuatralized.
+  [APEX STATUS] KINETIC_MITIGATION - Consensus Verified
+
+=================================================================
+  PIPELINE COMPLETE — Dos_1_4_30_20mins.pcap
+=================================================================
+  Flows analysed : 3,296
+  Attacks found  : 3,296  (100.0%)
+  Model          : XGBoost (99.1% accuracy, ROC-AUC 0.9998)
+  Dataset        : ISOT Drone (2,945,854 rows)
+  Deployment     : UAE-Tactical-Swarm-01
+=================================================================
+

@@ -1,84 +1,142 @@
-import tensorflow as tf
+"""
+modules/adversarial_engine.py  —  A-DIDS Adversarial Resilience (Phase 6)
+Implements FGSM (Fast Gradient Sign Method) for tabular data using NumPy/pandas.
+Works without TensorFlow — uses finite-difference gradient approximation
+against the XGBoost model's predict_proba output.
+
+Usage:
+    from modules.adversarial_engine import AdversarialEngine
+    adv = AdversarialEngine(model)
+    perturbed = adv.fgsm(feature_dict, epsilon=0.05)
+    evasion_rate = adv.evaluate_robustness(feature_dicts, epsilon=0.05)
+"""
+
+from __future__ import annotations
+import os
+import sys
+from typing import Any, Dict, List
+
 import numpy as np
+import pandas as pd
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
+from config.config import FEATURES, FGSM_EPSILON
+
 
 class AdversarialEngine:
-    def __init__(self, model):
-        """
-        Adversarial Resilience Engine for A-DIDS.
-        
-        Args:
-            model (tf.keras.Model): The IDS model to attack/harden.
-        """
-        self.model = model
-        self.loss_object = tf.keras.losses.BinaryCrossentropy()
+    """
+    Adversarial attack & robustness evaluation for XGBoost-based IDS.
+    Uses finite-difference gradient estimation (no autograd required).
+    """
 
-    def create_adversarial_pattern(self, input_image, input_label):
+    def __init__(self, model, epsilon: float = FGSM_EPSILON):
         """
-        Calculates the gradients for FGSM.
+        Parameters
+        ----------
+        model   : the trained XGBoost / sklearn-compatible model
+        epsilon : default FGSM perturbation magnitude
         """
-        with tf.GradientTape() as tape:
-            tape.watch(input_image)
-            prediction = self.model(input_image)
-            loss = self.loss_object(input_label, prediction)
+        self.model   = model
+        self.epsilon = epsilon
+        self.features = FEATURES
+        print(f"[Adversarial] Engine ready. Default epsilon={epsilon}")
 
-        # Get the gradients of the loss w.r.t to the input.
-        gradient = tape.gradient(loss, input_image)
-        # Get the sign of the gradients to create the perturbation.
-        signed_grad = tf.sign(gradient)
-        return signed_grad
+    def _predict_proba_attack(self, feature_dict: Dict[str, Any]) -> float:
+        """Return probability of ATTACK (class 1) for a single flow."""
+        row = pd.DataFrame([{f: feature_dict.get(f, 0.0) for f in self.features}])
+        return float(self.model.predict_proba(row)[0][1])
 
-    def generate_fgsm_sample(self, input_data, epsilon=0.01):
+    def _gradient(self, feature_dict: Dict[str, Any], delta: float = 1e-4) -> np.ndarray:
         """
-        Generates an adversarial example using FGSM.
-        
-        Args:
-            input_data (np.ndarray): Original network flow data.
-            epsilon (float): Perturbation step size.
-            
-        Returns:
-            np.ndarray: The perturbed adversarial sample.
+        Finite-difference gradient of P(attack) with respect to each feature.
+        ∂P/∂x_i ≈ [P(x + δ·e_i) - P(x)] / δ
         """
-        # Ensure input is a tensor
-        input_tensor = tf.convert_to_tensor(input_data, dtype=tf.float32)
-        
-        # Get model prediction to determine target
-        # For evasion, we want to shift 'Attack' (1) towards 'Normal' (0)
-        # or just maximize the error.
-        prediction = self.model(input_tensor)
-        
-        # If the sample is an attack, we want to fool it into being predicted as benign.
-        # So we use the "Attack" label as the ground truth and add the sign of gradient 
-        # to maximize the loss (push it away from 1 towards 0).
-        label = tf.ones_like(prediction) 
-        
-        perturbations = self.create_adversarial_pattern(input_tensor, label)
-        adversarial_sample = input_tensor + epsilon * perturbations
-        
-        # Clipping is less common in tabular data than images, but good for stability
-        # adversarial_sample = tf.clip_by_value(adversarial_sample, -3, 3) 
-        
-        return adversarial_sample.numpy()
+        base_vals = np.array([feature_dict.get(f, 0.0) for f in self.features])
+        base_p    = self._predict_proba_attack(feature_dict)
+        grad      = np.zeros_like(base_vals)
 
-    def adversarial_training_step(self, x_batch, y_batch, optimizer, epsilon=0.01):
+        for i in range(len(self.features)):
+            perturbed = base_vals.copy()
+            perturbed[i] += delta
+            p_dict_plus = dict(zip(self.features, perturbed))
+            grad[i] = (self._predict_proba_attack(p_dict_plus) - base_p) / delta
+
+        return grad
+
+    def fgsm(
+        self,
+        feature_dict: Dict[str, Any],
+        epsilon: float = None,
+        evasion: bool = True,
+    ) -> Dict[str, float]:
         """
-        Performs a single adversarial training step.
+        Generate an FGSM adversarial example.
+
+        Parameters
+        ----------
+        feature_dict : original flow features
+        epsilon      : perturbation magnitude (defaults to self.epsilon)
+        evasion      : if True, perturb to evade (minimize P(attack));
+                       if False, amplify (maximize P(attack))
+
+        Returns
+        -------
+        Perturbed feature dict with same keys as input
         """
-        with tf.GradientTape() as tape:
-            # Generate adversarial examples for this batch
-            x_adv = self.generate_fgsm_sample(x_batch, epsilon=epsilon)
-            
-            # Predict both original and adversarial
-            p_orig = self.model(x_batch)
-            p_adv = self.model(x_adv)
-            
-            # Combined loss: optimize for both accuracy and robustness
-            loss_orig = self.loss_object(y_batch, p_orig)
-            loss_adv = self.loss_object(y_batch, p_adv)
-            total_loss = (loss_orig + loss_adv) / 2
-            
-        gradients = tape.gradient(total_loss, self.model.trainable_variables)
-        optimizer.apply_gradients(zip(gradients, self.model.trainable_variables))
-        return total_loss
+        eps  = epsilon if epsilon is not None else self.epsilon
+        grad = self._gradient(feature_dict)
+
+        # Evasion: subtract gradient sign to reduce P(attack)
+        # Amplification: add gradient sign to increase P(attack)
+        direction = -1 if evasion else 1
+        sign_grad = np.sign(grad) * direction
+
+        base_vals   = np.array([feature_dict.get(f, 0.0) for f in self.features])
+        perturbed   = base_vals + eps * sign_grad
+
+        return {f: float(v) for f, v in zip(self.features, perturbed)}
+
+    def evaluate_robustness(
+        self,
+        feature_dicts: List[Dict[str, Any]],
+        epsilon: float = None,
+    ) -> Dict[str, Any]:
+        """
+        Compute the evasion rate: fraction of attack flows that escape
+        detection after adversarial perturbation.
+
+        Returns
+        -------
+        dict: epsilon, tested, evaded, evasion_rate
+        """
+        eps     = epsilon if epsilon is not None else self.epsilon
+        evaded  = 0
+        tested  = 0
+
+        for fd in feature_dicts:
+            # Only test flows the model currently classifies as attacks
+            orig_p = self._predict_proba_attack(fd)
+            if orig_p < 0.5:
+                continue
+            tested += 1
+            perturbed = self.fgsm(fd, epsilon=eps, evasion=True)
+            new_p     = self._predict_proba_attack(perturbed)
+            if new_p < 0.5:
+                evaded += 1
+
+        return {
+            "epsilon":      eps,
+            "tested":       tested,
+            "evaded":       evaded,
+            "evasion_rate": evaded / tested if tested else 0.0,
+        }
+
 
 if __name__ == "__main__":
-    print("A-DIDS Adversarial Engine initialized. Ready for Red-Teaming.")
+    import joblib
+    model  = joblib.load("models/model.pkl")
+    engine = AdversarialEngine(model)
+    dummy  = {f: 1.0 for f in FEATURES}
+    perturbed = engine.fgsm(dummy)
+    print("Original:", {f: 1.0 for f in FEATURES})
+    print("Perturbed:", perturbed)
