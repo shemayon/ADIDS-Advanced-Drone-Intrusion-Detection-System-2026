@@ -62,17 +62,35 @@ def preprocess(df):
     print("[INFO] Final shape:", df.shape)
     return df
 
-def main():
-    # Use the 'extracted' directory as the base
-    df = load_data("A-DIDS/data/extracted")
-    df = preprocess(df)
+files = glob.glob("extracted/**/new_feature_csv/**/*.csv", recursive=True)
 
-    if df is not None:
-        output_file = "A-DIDS/data/drone_dataset.parquet"
-        df.to_parquet(output_file, index=False)
-        print(f"[INFO] Saved {output_file}")
+dfs = []
+
+for f in files:
+    print("[INFO] Loading:", f)
+    # Using low_memory=False to avoid DtypeWarning if any
+    df = pd.read_csv(f, low_memory=False)
+    
+    # Extract attack type from the parent directory
+    # Structure: .../new_feature_csv/DIR_NAME/FILE.csv
+    attack_type = os.path.basename(os.path.dirname(f))
+    
+    # Map 'Regular' and 'Video' to 'benign', otherwise use the dir name
+    if attack_type in ["Regular", "Video"]:
+        df["attack_type"] = "benign"
     else:
-        print("[ERROR] Data pipeline failed to generate dataset.")
+        df["attack_type"] = attack_type
+        
+    dfs.append(df)
 
-if __name__ == "__main__":
-    main()
+df = pd.concat(dfs, ignore_index=True)
+
+df["label"] = (df["attack_type"] != "benign").astype(int)
+
+# Filter for selected features and label
+df = df[SELECTED_FEATURES + ["label"]]
+df = df.dropna()
+
+df.to_parquet("drone_dataset.parquet", index=False)
+
+print("[INFO] Saved dataset:", df.shape)
