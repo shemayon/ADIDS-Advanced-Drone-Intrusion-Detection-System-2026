@@ -29,16 +29,16 @@ A-DIDS utilizes a modular pipeline designed for real-world deployment, merging l
 
 ```mermaid
 graph TD
-    A[Live Traffic / PCAP] --> B[Scapy Live Sniffer]
-    B --> C[Real-Time Flow Reconstruction]
-    C --> D[XGBoost Detection Core]
-    D --> E[FastAPI Microservice]
-    D --> F[SHAP Explainability]
-    E --> G[Tactical Command Dashboard]
+    A["Live Traffic / PCAP"] --> B["Scapy Live Sniffer"]
+    B --> C["Real-Time Flow Reconstruction"]
+    C --> D["XGBoost Detection Core"]
+    D --> E["FastAPI Microservice"]
+    D --> F["SHAP Explainability"]
+    E --> G["Tactical Command Dashboard"]
     
     subgraph "Production Defense Layers"
-    D --> H[Zero-Day Anomaly Detection]
-    D --> I[SDN Mitigation (simulated)]
+    D --> H["Zero-Day Anomaly Detection"]
+    D --> I["SDN Mitigation (simulated)"]
     end
 ```
 
