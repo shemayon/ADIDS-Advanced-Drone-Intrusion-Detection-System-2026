@@ -19,7 +19,22 @@ FEATURES = [
 
 # ── Label ──────────────────────────────────────────────────────
 LABEL_COL = "label"
+CLASS_LABEL_COL = "class_label"
 BENIGN_DIRS = {"Regular", "Video"}          # dirs treated as benign
+
+# Multi-class mapping based on discovered folder structure
+ATTACK_CLASSES = {
+    "Regular": 0,
+    "Video": 0,
+    "DoS": 1,
+    "Injection": 2,
+    "Manipulation": 3,
+    "MITM": 4,
+    "Password Cracking": 5,
+    "Replay": 6,
+    "Ip Spoofing": 7,
+    "Unauth": 8
+}
 ATTACK_LABEL = 1
 BENIGN_LABEL = 0
 

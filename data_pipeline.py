@@ -16,7 +16,7 @@ import pandas as pd
 
 # Add repo root to path for config import
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from config.config import FEATURES, BENIGN_DIRS, DATA_PATH
+from config.config import FEATURES, BENIGN_DIRS, DATA_PATH, ATTACK_CLASSES, CLASS_LABEL_COL
 
 # ── CLI ───────────────────────────────────────────────────────
 parser = argparse.ArgumentParser(description="A-DIDS Data Pipeline")
@@ -54,7 +54,7 @@ for f in files:
 
     # Infer attack type from parent directory name
     attack_type = os.path.basename(os.path.dirname(f))
-    df["attack_type"] = "benign" if attack_type in BENIGN_DIRS else attack_type
+    df["attack_type"] = attack_type
     dfs.append(df)
 
 print(f"  Loaded: {len(dfs)} files  |  Skipped: {skipped}")
@@ -64,7 +64,8 @@ print(f"\n[3/4] Merging and preprocessing ...")
 df = pd.concat(dfs, ignore_index=True)
 print(f"  Raw shape: {df.shape}")
 
-df["label"] = (df["attack_type"] != "benign").astype(int)
+df["label"] = (~df["attack_type"].isin(BENIGN_DIRS)).astype(int)
+df[CLASS_LABEL_COL] = df["attack_type"].map(ATTACK_CLASSES).fillna(8).astype(int)
 
 # Validate all selected features exist
 missing = [f for f in FEATURES if f not in df.columns]
@@ -72,12 +73,16 @@ if missing:
     print(f"[ERROR] Missing feature columns: {missing}")
     sys.exit(1)
 
-df = df[FEATURES + ["label"]]
+df = df[FEATURES + ["label", CLASS_LABEL_COL]]
 df = df.dropna()
 
 print(f"  Final shape: {df.shape}")
 print(f"  Benign rows : {(df['label'] == 0).sum():,}")
 print(f"  Attack rows : {(df['label'] == 1).sum():,}")
+print("\n[Class Distribution]")
+for name, cid in ATTACK_CLASSES.items():
+    count = (df[CLASS_LABEL_COL] == cid).sum()
+    print(f"  {name:15}: {count:,}")
 
 # ── 4. Export Parquet ─────────────────────────────────────────
 print(f"\n[4/4] Saving to: {args.output}")

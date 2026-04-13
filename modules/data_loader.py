@@ -15,7 +15,7 @@ import pandas as pd
 from sklearn.model_selection import train_test_split
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
-from config.config import FEATURES, DATA_PATH, TEST_SIZE, RANDOM_STATE
+from config.config import FEATURES, DATA_PATH, TEST_SIZE, RANDOM_STATE, LABEL_COL
 
 
 class A_DIDS_DataLoader:
@@ -45,21 +45,22 @@ class A_DIDS_DataLoader:
               f"Attack rate: {self._df['label'].mean():.2%}")
         return self._df
 
-    def get_X_y(self) -> Tuple[pd.DataFrame, pd.Series]:
+    def get_X_y(self, target_col: str = LABEL_COL) -> Tuple[pd.DataFrame, pd.Series]:
         """Return feature matrix X and label series y."""
         if self._df is None:
             self.load()
         X = self._df[self.features]
-        y = self._df["label"]
+        y = self._df[target_col]
         return X, y
 
     def get_train_test_split(
         self,
         test_size: float = TEST_SIZE,
         random_state: int = RANDOM_STATE,
+        target_col: str = LABEL_COL,
     ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
-        """Return stratified 80/20 train/test split."""
-        X, y = self.get_X_y()
+        """Return stratified train/test split."""
+        X, y = self.get_X_y(target_col=target_col)
         return train_test_split(X, y,
                                 test_size=test_size,
                                 random_state=random_state,
