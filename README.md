@@ -48,15 +48,26 @@ graph TD
 # 1. Install Production Dependencies
 pip install -r requirements.txt
 
-# 2. Run Multi-Model Benchmarking
-python benchmark_models.py
+# 2. Preprocess Dataset (Converts raw CSVs to Parquet)
+python data_pipeline.py --base-path "/path/to/extracted/dataset"
 
-# 3. Start Live Sniffer (Requires Root for Capture)
+# 3. Train the Multi-Class Model
+python train_multiclass.py
+
+# 4. Start Live Sniffer (Requires Root for Capture)
 sudo python live_sniffer.py
 
-# 4. Launch Production API
+# 5. Launch Production API
 uvicorn api.app:app --host 0.0.0.0 --port 8000
 ```
+
+---
+
+## 📅 Dataset Reference
+This project utilizes the **ISOT Drone Dataset**, a specialized collection of Wi-Fi-based telemetry from the **DJI Edu Tello** drone. It covers a wide spectrum of adversarial scenarios including DoS, MITM, and Injection attacks.
+
+- **Download Link**: [ISOT Drone Dataset (Google Drive)](https://drive.google.com/file/d/1ILTxl5p4j4zBnQNuEOTnyyviZEgHpDtF/view)
+- **Citation**: *ISOT Drone Dataset - Wi-Fi-based DJI Edu Tello drone network flow collection.*
 
 ---
 
